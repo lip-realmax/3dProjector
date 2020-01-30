@@ -78,25 +78,12 @@ socket.on('connect', function(){
     
     socket.emit('camera-online', {name: projectorName, ipAddress: ipAddress, version: version});
     
-    //Add support for multiple webcams
-    //var _camRange  = 2 * ( extraWebCams + 1 );
-    
-    //for ( var i=0; i<_camRange; i+=2 ){    //stride for 2
-    //    var camID = _cam + i;       //The camera ID
-    //    if ( fs.existsSync( camID )){
-    //        socket.emit('camera-online', {name: projectorName + '-' + camID, ipAddress: ipAddress, version: version});
-    //    }
-    //}
-    
     ts.sync();
 
     // Setup a regular heartbeat interval
     
     heartbeat();
-    update_DSLR_Battery_Info();
-    
     var heartbeatIntervalID = setInterval(heartbeat, 1000);
-    var heartbeatIntervalID_battery = setInterval(update_DSLR_Battery_Info, 900000);
 });
 
 socket.on('timeSync-test', function(data){
@@ -215,7 +202,7 @@ function heartbeat() {
         lookupIp();
     }
       
-    socket.emit('camera-online', {name: projectorName, ipAddress: ipAddress, hostName: hostName, version: version, updateInProgress: updateInProgress, DSLR_battery: DSLR_BatteryLevel});
+    socket.emit('camera-online', {name: projectorName, ipAddress: ipAddress, hostName: hostName, version: version, updateInProgress: updateInProgress });
 }
 
 function lookupIp() {
