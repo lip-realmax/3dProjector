@@ -3,9 +3,16 @@
 ## Remarks
 
 X11 development package needed to be installed
+
 ``
 sudo apt-get install xorg-dev
 ``
+Image viewer needed to be installed as well
+
+``
+sudo apt-get installl feh
+``
+
 
 ### Supervisor - Keeping the software running
 

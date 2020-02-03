@@ -24,6 +24,7 @@ var fs = require('fs');
 var FormData = require('form-data');
 var request  = require('request');
 var timesync = require('timesync');
+var robot = require('robotjs');
 
 var os     = require('os');
 
@@ -76,7 +77,7 @@ socket.on('disconnect', function(){
 socket.on('connect', function(){
     console.log('A socket connection was made');
     
-    socket.emit('camera-online', {name: projectorName, ipAddress: ipAddress, version: version});
+    socket.emit('projector-online', {name: projectorName, ipAddress: ipAddress, version: version});
     
     ts.sync();
 
@@ -106,9 +107,9 @@ socket.on('timeSync-test', function(data){
     }, waitTime );
 });
 
-socket.on('take-photo', function(data){
+socket.on('take-photo', function(data){    
     console.log("Taking a photo");
-
+            
     lastReceiveTime = data.time
     takeId          = data.takeId;
     
@@ -120,42 +121,14 @@ socket.on('take-photo', function(data){
     if ( waitTime < 0 ){    //Act immediately
         waitTime = 0;
     }
-    
-    setTimeout( function(){
-        photoStartTime  = ts.now();
-        takeImage();
+    setTimeout(function(){
         socket.emit('timeSync-return', { 
-            networkLatency: commandRecievedTime - lastReceiveTime,
-            executeDelta: photoStartTime- expectedRunningTime 
+            executeDelta: ts.now() - expectedRunningTime,
+            networkLatency: commandRecievedTime - lastReceiveTime
         } );
     }, waitTime );
-});
-
-socket.on('take-photo-DSLR', function(data){    
-    kill_gphoto2_before_process(function(code){
-        console.log("Taking a photo(DSLR)");
-    });
-            
-    var lastReceiveTime_DSLR = data.time
-    takeId          = data.takeId;
     
-    var expectedRunningTime = lastReceiveTime_DSLR + data.countDown;
-    var commandRecievedTime = ts.now();
-
-    var waitTime         = expectedRunningTime - commandRecievedTime - 1;
-    
-    if ( waitTime < 0 ){    //Act immediately
-        waitTime = 0;
-    }
-        
-    setTimeout( function(){
-        photoStartTime_DSLR = ts.now();
-        takeImage_DSLR();
-        socket.emit('timeSync-return', { 
-            networkLatency_DSLR: commandRecievedTime - lastReceiveTime_DSLR,
-            executeDelta_DSLR: photoStartTime_DSLR - expectedRunningTime 
-        } );
-    }, waitTime );
+    triggerProjector( expectedRunningTime );
 });
 
 socket.on('execute-command', function(data){
@@ -202,7 +175,7 @@ function heartbeat() {
         lookupIp();
     }
       
-    socket.emit('camera-online', {name: projectorName, ipAddress: ipAddress, hostName: hostName, version: version, updateInProgress: updateInProgress });
+    socket.emit('projector-online', {name: projectorName, ipAddress: ipAddress, hostName: hostName, version: version, updateInProgress: updateInProgress });
 }
 
 function lookupIp() {
@@ -218,6 +191,39 @@ function lookupIp() {
         ipAddress = iface.address;
       });
     });
+}
+
+function tabSpace(){
+    robot.keyTap('space');
+} 
+
+//@Lip trigger the projector
+function triggerProjector( expectedRunningTime ){
+    var imagesPath = path.join(__dirname, "/images");
+    var process = spawn('bash');
+
+    process.stdout.on('data', function(data){
+        console.log( data.toString());
+    });
+    process.stderr.on('data', function(data){
+        console.log( data.toString());
+    });
+    process.stdin.write('export DISPLAY=:0\n');
+    process.stdin.write('feh -FZs ' + imagesPath + '\n');
+    process.stdin.end();
+
+    var waitTime = expectedRunningTime - ts.now();
+    console.log( waitTime );
+    
+    setTimeout(tabSpace, waitTime - 1000 );
+    setTimeout(tabSpace, waitTime + 200 );
+    
+    /*setTimeout(function(){
+        robot.keyTap('space');
+        socket.emit('timeSync-return', { 
+            executeDelta: ts.now() - expectedRunningTime - 50
+        } );
+    }, waitTime + 50 );*/
 }
 
  //@Lip Execute command
