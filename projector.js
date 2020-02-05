@@ -241,7 +241,7 @@ function triggerProjector( expectedRunningTime ){
     console.log( waitTime );
     
     setTimeout(tabSpace, waitTime - 1000 );
-    setTimeout(tabSpace, waitTime + 300 );
+    setTimeout(tabSpace, waitTime + 220 );
     setTimeout(function(){
         console.log("Kill the feh");
         process.kill();
