@@ -241,11 +241,11 @@ function triggerProjector( expectedRunningTime ){
     console.log( waitTime );
     
     setTimeout(tabSpace, waitTime - 1000 );
-    setTimeout(tabSpace, waitTime + 220 );
+    setTimeout(tabSpace, waitTime + 300 );
     setTimeout(function(){
         console.log("Kill the feh");
         process.kill();
-    }, waitTime + 3000 );
+    }, waitTime + 5000 );
     
     /*setTimeout(function(){
         robot.keyTap('space');
