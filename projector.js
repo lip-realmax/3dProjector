@@ -215,7 +215,13 @@ function tabSpace(){
 //@Lip trigger the projector
 function triggerProjector( expectedRunningTime ){
     var imagesPath = path.join(__dirname, "/images");
-    var process = spawn('bash');
+    
+    var args = [
+        '-FZs',
+        imagesPath
+    ];
+    
+    var process = spawn('feh', args);
 
     process.stdout.on('data', function(data){
         console.log( data.toString());
@@ -223,16 +229,19 @@ function triggerProjector( expectedRunningTime ){
     process.stderr.on('data', function(data){
         console.log( data.toString());
     });
-    process.stdin.write('export DISPLAY=:0\n');
-    process.stdin.write('feh -FZs ' + imagesPath + '\n');
-    process.stdin.end();
+    //process.stdin.write('export DISPLAY=:0\n');
+    //process.stdin.write('feh -FZs ' + imagesPath + '\n');
+    //process.stdin.end();
 
     var waitTime = expectedRunningTime - ts.now();
     console.log( waitTime );
     
     setTimeout(tabSpace, waitTime - 1000 );
     setTimeout(tabSpace, waitTime + 200 );
-    setTimeout(function(){process.kill();}, waitTime + 3000 );
+    setTimeout(function(){
+        console.log("Kill the feh");
+        process.kill();
+    }, waitTime + 3000 );
     
     /*setTimeout(function(){
         robot.keyTap('space');
