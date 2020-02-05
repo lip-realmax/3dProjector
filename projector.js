@@ -221,7 +221,11 @@ function triggerProjector( expectedRunningTime ){
         imagesPath
     ];
     
-    var process = spawn('feh', args);
+    var process = spawn('feh', args, { 
+        env: {
+            DISPLAY: ":0"
+        }
+    });
 
     process.stdout.on('data', function(data){
         console.log( data.toString());
